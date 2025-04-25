@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,7 +26,7 @@ type Server struct {
 }
 
 func main() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -43,6 +42,8 @@ func main() {
 	books := postgresRepo.CreateTableBook(db)
 	librar := controllers.NewLibrary()
 	librar.AddBooks(books)
+
+	booksController := &controllers.BookController{DB: db}
 
 	resp := controllers.NewResponder(logger)
 
@@ -90,8 +91,8 @@ func main() {
 		// Книги
 		r.Post("/api/book/take/{id}", bookController.TakeBookHandler(resp, db, &books, librar))
 		r.Delete("/api/book/return/{id}", bookController.ReturnBook(resp, db, &books, librar))
-		r.Post("/api/books", bookController.AddBookHandler(resp, db, librar, &books))
-		r.Get("/api/books", bookController.ListBooks)
+		r.Post("/api/book", bookController.AddBookHandler(resp, db, librar, &books))
+		r.Get("/api/books", booksController.ListBooks)
 		r.Put("/api/books/{id}", bookController.UpdateBook(resp, db))
 
 		// Авторы
@@ -110,17 +111,7 @@ func main() {
 	}
 
 	// Создаем Listener
-	listener, err := net.Listen("tcp", srv.Addr)
-	if err != nil {
-		log.Fatalf("Error creating listener: %v", err)
-	}
-
-	// Запускаем сервер в горутине
-	go func() {
-		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Error starting server: %v", err)
-		}
-	}()
+	go srv.Serve()
 
 	WaitForShutdown(srv)
 }
@@ -136,5 +127,12 @@ func WaitForShutdown(srv *Server) {
 		log.Printf("Error shutting down server: %v\n", err)
 	} else {
 		log.Println("Server stopped gracefully")
+	}
+}
+
+func (s *Server) Serve() {
+	log.Println("Starting server...")
+	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Server error: &v", err)
 	}
 }
