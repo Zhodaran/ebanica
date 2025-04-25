@@ -1,0 +1,428 @@
+definitions:
+  auth.ErrorResponse:
+    properties:
+      "200":
+        type: string
+      "400":
+        type: string
+      "500":
+        type: string
+    type: object
+  auth.LoginResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  auth.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  auth.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  control.CreateResponse:
+    properties:
+      books:
+        description: Добавляем поле для списка книг
+        items:
+          $ref: '#/definitions/repository.Book'
+        type: array
+      message:
+        type: string
+    type: object
+  control.rErrorResponse:
+    properties:
+      "200":
+        type: string
+      "400":
+        type: string
+      "500":
+        type: string
+    type: object
+  controller.AuthorRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  controller.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  controller.TakeBookRequest:
+    properties:
+      username:
+        description: Поле для имени пользователя
+        type: string
+    type: object
+  controller.mErrorResponse:
+    properties:
+      "200":
+        type: string
+      "400":
+        type: string
+      "500":
+        type: string
+    type: object
+  repository.AddaderBook:
+    properties:
+      author:
+        type: string
+      book:
+        type: string
+    type: object
+  repository.Book:
+    properties:
+      author:
+        type: string
+      block:
+        type: boolean
+      book:
+        type: string
+      index:
+        type: integer
+      take_count:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Этот эндпоинт позволяет получить адрес по наименованию
+  title: Address API
+  version: "1.0"
+paths:
+  /api/authors:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows you to add a new author to the library.
+      parameters:
+      - description: Author name
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/controller.AuthorRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Author added successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      summary: Add a new author to the library
+      tags:
+      - Authors
+  /api/book:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows you to add a new book to the library.
+      parameters:
+      - description: Book details
+        in: body
+        name: book
+        schema:
+          $ref: '#/definitions/repository.AddaderBook'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Book added successfully
+          schema:
+            $ref: '#/definitions/repository.Book'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      summary: Add a new book to the library
+      tags:
+      - Books
+  /api/book/{index}:
+    put:
+      consumes:
+      - application/json
+      description: Этот эндпоинт позволяет обновить информацию о книге по индексу.
+      parameters:
+      - description: Индекс книги
+        in: path
+        name: index
+        required: true
+        type: integer
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Обновленная информация о книге
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/repository.Book'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное обновление книги
+          schema:
+            $ref: '#/definitions/repository.Book'
+        "400":
+          description: Ошибка запроса
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "404":
+          description: Книга не найдена
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      summary: Обновление информации о книге
+      tags:
+      - Books
+  /api/book/return/{index}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows you to get geo coordinates by address.
+      parameters:
+      - description: Book INDEX
+        in: path
+        name: index
+        required: true
+        type: integer
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controller.TakeBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное выполнение
+          schema:
+            $ref: '#/definitions/controller.Response'
+        "400":
+          description: Ошибка запроса
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "500":
+          description: Ошибка подключения к серверу
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Geo Coordinates by Address
+      tags:
+      - User
+  /api/book/take/{index}:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows you to get geo coordinates by address.
+      parameters:
+      - description: Book INDEX
+        in: path
+        name: index
+        required: true
+        type: integer
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controller.TakeBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное выполнение
+          schema:
+            $ref: '#/definitions/controller.Response'
+        "400":
+          description: Ошибка запроса
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+        "500":
+          description: Ошибка подключения к серверу
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Geo Coordinates by Address
+      tags:
+      - User
+  /api/books:
+    get:
+      consumes:
+      - application/json
+      description: This description created new SQL user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List successful
+          schema:
+            $ref: '#/definitions/control.CreateResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/control.rErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/control.rErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/control.rErrorResponse'
+      summary: List SQL book
+      tags:
+      - Books
+  /api/get-authors:
+    get:
+      description: Get a list of all authors in the library
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of authors
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: No authors found
+          schema:
+            $ref: '#/definitions/controller.mErrorResponse'
+      summary: Get all authors
+      tags:
+      - Authors
+  /api/login:
+    post:
+      description: This endpoint allows a user to log in with their username and password.
+      parameters:
+      - description: User login details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+      summary: Login a user
+      tags:
+      - auth
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows you to register a new user with a username
+        and password.
+      parameters:
+      - description: User registration details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns a list of all registered users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of registered users
+          schema:
+            items:
+              $ref: '#/definitions/auth.User'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+      summary: Get List of Registered Users
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
