@@ -89,11 +89,11 @@ func main() {
 		r.Get("/api/users", userController.ListUsers)
 
 		// Книги
-		r.Post("/api/book/take/{id}", bookController.TakeBookHandler(resp, db, &books, librar))
-		r.Delete("/api/book/return/{id}", bookController.ReturnBook(resp, db, &books, librar))
+		r.Post("/api/book/take/{index}", bookController.TakeBookHandler(resp, db, &books, librar))
+		r.Delete("/api/book/return/{index}", bookController.ReturnBook(resp, db, &books, librar))
 		r.Post("/api/book", bookController.AddBookHandler(resp, db, librar, &books))
 		r.Get("/api/books", booksController.ListBooks)
-		r.Put("/api/books/{id}", bookController.UpdateBook(resp, db))
+		r.Put("/api/books/{index}", bookController.UpdateBook(resp, db))
 
 		// Авторы
 		r.Post("/api/authors", authorController.AddAuthorHandler(resp, librar))
